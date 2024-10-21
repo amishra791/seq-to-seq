@@ -163,17 +163,3 @@ def get_training_dataloader(
     )
 
     return dataloader
-
-
-if __name__ == "__main__":
-    dataset, max_len = get_dataset(num_vocab=10000)
-    src_vocab, tgt_vocab = dataset.src_vocab, dataset.tgt_vocab
-    print(len(dataset.src_vocab), len(dataset.tgt_vocab))
-    dataloader = get_training_dataloader(dataset, max_len=max_len, batch_size=64)
-
-    i = 0
-    for src, tgt in dataloader:
-        print(src.shape, tgt.shape)
-        i += 1
-        if i > 10:
-            break
