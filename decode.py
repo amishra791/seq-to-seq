@@ -8,11 +8,8 @@ from lstm_model import (
     SeqToSeq,
     DecoderParams,
     SeqToSeqParams,
-    SeqToSeqConfig,
     SeqToSeqVariables,
     seq_to_seq_apply,
-    EncoderConfig,
-    DecoderConfig,
     init_seq_to_seq,
     encoder_apply,
     compute_context_vector,
@@ -125,34 +122,3 @@ def seq_to_seq_greedy_decode(
     )
 
     return next_token_predictions_bl
-
-
-if __name__ == "__main__":
-    dataset, max_len = get_dataset(num_vocab=10000)
-    src_vocab, tgt_vocab = dataset.src_vocab, dataset.tgt_vocab
-    dataloader = get_training_dataloader(dataset, max_len=max_len, batch_size=64)
-
-    key = jax.random.key(0)
-    encoder_config = EncoderConfig(
-        d_embed=128, d_model=256, d_src_vocab=len(dataset.src_vocab), n_layers=2
-    )
-    decoder_config = DecoderConfig(
-        d_embed=128, d_model=256, d_tgt_vocab=len(dataset.tgt_vocab), n_layers=2
-    )
-    seq_to_seq_config = SeqToSeqConfig(
-        encoder_config=encoder_config, decoder_config=decoder_config
-    )
-
-    _, seq_to_seq = init_seq_to_seq(key, seq_to_seq_config)
-
-    for src, tgt in dataloader:
-        print(src.shape, tgt.shape)
-        src_mask_bl = jnp.where(src != src_vocab[PAD_TOKEN], 1, 0)
-        logits_bld = seq_to_seq_apply(
-            src, src_mask_bl, tgt, seq_to_seq.params, seq_to_seq.variables
-        )
-        print(logits_bld.shape)
-        next_token_predictions_bl = seq_to_seq_greedy_decode(
-            src, seq_to_seq.params, seq_to_seq.variables, src_vocab[PAD_TOKEN]
-        )
-        print(next_token_predictions_bl.shape)
